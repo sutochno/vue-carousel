@@ -3,6 +3,8 @@ const webpack = require('webpack');
 const npmCfg = require('./package.json');
 const projectRoot = path.resolve(__dirname, './');
 
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+
 const { VueLoaderPlugin } = require('vue-loader');
 
 const banner = [
@@ -53,14 +55,36 @@ module.exports = {
         include: projectRoot,
         exclude: /node_modules/
       },
+      // {
+      //   test: /\.css$/,
+      //   use: [ 'vue-style-loader', 'css-loader' ]
+      // },
       {
         test: /\.css$/,
-        use: [ 'vue-style-loader', 'css-loader' ]
-      }
+        use: [
+          {
+            loader: MiniCssExtractPlugin.loader,
+            options: {
+              // you can specify a publicPath here
+              // by default it uses publicPath in webpackOptions.output
+              publicPath: '../',
+              hmr: process.env.NODE_ENV === 'development',
+            },
+          },
+          'css-loader',
+        ],
+      },
     ]
   },
   plugins: [
     new webpack.BannerPlugin(banner),
-    new VueLoaderPlugin()
+    new VueLoaderPlugin(),
+    new MiniCssExtractPlugin({
+      // Options similar to the same options in webpackOptions.output
+      // all options are optional
+      filename: 'vue-carousel.css',
+      // chunkFilename: '[id].css',
+      ignoreOrder: false, // Enable to remove warnings about conflicting order
+    }),
   ]
 }
